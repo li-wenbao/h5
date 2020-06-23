@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+   <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Document</title>
+    <style>
+        .wrap {
+            width: 90%;
+            margin: 50px auto;
+            background-color: #333333;
+            text-align: center;
+            padding: 50px 0;
+        }
+
+        .time {
+            margin-bottom: 50px;
+			font-size:12px
+        }
+
+        span {
+            color: white;
+            font-size: 18px;
+        }
+
+        .control button {
+            width: 80px;
+            height: 40px;
+            border-radius: 7px;
+            border: 1px solid #333;
+            outline: none;
+            font-size: 20px;
+            color: white;
+        }
+
+        .control button:nth-child(1) {
+            background-color: #90f62b;
+        }
+
+        .control button:nth-child(2) {
+            background-color: #35b1f8;
+        }
+
+        .control button:nth-child(3) {
+            background-color: #f5a123;
+            display: none;
+        }
+
+        .control button:nth-child(4) {
+            background-color: #f75629;
+            display: none;
+        }
+
+        .time span:last-child {
+            display: inline-block;
+            width: 90px;
+        }
+
+        #show {
+            color: white;
+            font-size: 18px;
+            margin: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrap">
+        <div class="time">
+            <span>00:</span>
+            <span>00:</span>
+            <span>00:</span>
+            <span>000</span>
+        </div>
+        <div class="control">
+            <button>启动</button>
+            <button>复位</button>
+            <button>计次</button>
+            <button>暂停</button>
+        </div>
+        <div id="show"></div>
+    </div>
+    <script>
+        // 获取元素
+        var num = document.querySelectorAll(".time span");
+        var start = document.querySelectorAll(".control button")[0];
+        var reset = document.querySelectorAll(".control button")[1];
+        var times = document.querySelectorAll(".control button")[2];
+        var pause = document.querySelectorAll(".control button")[3];
+        var show = document.getElementById("show");
+        // 初始化时间值
+        var hour = 0,
+            minutes = 0,
+            seconds = 0,
+            ms = 0;
+        // 创建定时器的变量
+        var timer;
+        // 创建时间数组
+        var timeArr = [hour, minutes, seconds, ms];
+
+        function fun() {
+            // 设置定时器
+            timer = setInterval(function () {
+                // +=11 秒数最后一位数也会变化，+=10最后一位永远是0
+                ms += 11;
+                // 如果毫秒数大于0小于999，毫秒数的位置还是该毫秒数
+                // 否则（大于999），毫秒数的位置替换为000，毫秒数重置为0，分钟++
+                if (ms > 0 && ms < 999) {
+                    num[3].innerHTML = ms;
+                } else {
+                    num[3].innerHTML = '000';
+                    ms = 0;
+                    seconds++;
+                }
+                // 如果秒数大于0并小于59
+                if (seconds > 0 && seconds < 59) {
+                    // 如果秒数小于10，秒数写为0和当前秒数（01-09）
+                    if (seconds < 10) {
+                        num[2].innerHTML = '0' + seconds + ':';
+                    } else {
+                        // 秒数大于10，秒数为当前值
+                        num[2].innerHTML = seconds + ':';
+                    }
+                } else {
+                    // 秒数超过59，重置为0，分钟++，秒数位置变成00
+                    seconds = 0;
+                    minutes++;
+                    num[2].innerHTML = "00" + ':';
+                }
+
+                if (seconds > 59) {
+                    // 如果秒数大于59，且分钟小于10，补0，分钟大于10，显示
+                    if (minutes < 10) {
+                        num[1].innerHTML = '0' + minutes + ':';
+                    } else {
+                        num[1].innerHTML = minutes + ':';
+                    }
+                    // 秒数大于59，分钟++ 显示分钟数
+                    minutes++;
+                    num[1].innerHTML = minutes + ':';
+                    // 如果秒数小于59，显示00分钟
+                    // 分钟变成0，小时++
+                } else {
+                    num[1].innerHTML = '00' + ':';
+                    minutes = 0;
+                    hour++;
+                }
+
+                // 如果，分钟数大于59，进入外层条件
+                if (minutes > 59) {
+                    // 如果小时小于10，小时处的内容为补0 + 小时数
+                    if (hour < 10) {
+                        num[0].innerHTML = '0' + hour + ':';
+                    } else {
+                        num[0].innerHTML = hour + ':';
+                    }
+                }
+            }, 10);
+        }
+        // 封装一个函数
+        // t作为计数器，作为每一条时间的序列号
+        var t = 0;
+
+        function counter() {
+            // 用abcd获取num数组的各个下标的值
+            var a = num[0].innerHTML;
+            var b = num[1].innerHTML;
+            var c = num[2].innerHTML;
+            var d = num[3].innerHTML;
+            // 函数调用，计时器++（d点一次加一条）
+            t++;
+            // 创建一个p元素，追加给展示区（展示每一条事件列表）
+            var n = document.createElement('p');
+            n.innerHTML = t + '.' + a + b + c + d;
+            show.appendChild(n);
+        }
+        // 清除定时器
+        function clear() {
+            clearInterval(timer);
+        }
+
+        // 重置函数
+        function over() {
+            // 清楚定时器
+            clearInterval(timer);
+            // 把时间重置
+            hour = 0;
+            seconds = 0;
+            minutes = 0;
+            ms = 0;
+            // 页面元素赋值重置
+            num[0].innerHTML = '0' + hour + ':';
+            num[1].innerText = '0' + minutes + ' : ';
+            num[2].innerText = '0' + seconds + ' . ';
+            num[3].innerText = '00' + ms;
+        }
+
+        // 开始按钮注册点击时间，隐藏开始重置按钮，计时暂停按钮出现
+        // 调用函数开始运行整个计时器
+        start.onclick = function () {
+            start.style.display = "none";
+            reset.style.display = "none";
+            times.style.display = "inline-block";
+            pause.style.display = "inline-block";
+            fun();
+        }
+        // 点击停止按钮，隐藏停止计次按钮，开始重置按钮出现
+        pause.onclick = function () {
+            pause.style.display = "none";
+            times.style.display = "none";
+            start.style.display = "inline-block";
+            reset.style.display = "inline-block";
+            clear();
+        }
+
+        // 点击计次按钮，在展示区防放置当前时间值
+        times.onclick = function () {
+            counter();
+        }
+        // 点击重置按钮，重置页面元素，重置时间，清空页面内容
+        reset.onclick = function () {
+            over();
+            show.innerHTML = '';
+        }
+    </script>
+</body>
+</html>
